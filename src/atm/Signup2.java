@@ -106,10 +106,10 @@ public class Signup2 extends JFrame implements ActionListener {
 
         seniorYes = new JRadioButton("Yes");
         seniorYes.setBounds(250, 370, 60, 25);
-        seniorYes.setBackground(Color.WHITE);
-
         seniorNo = new JRadioButton("No");
         seniorNo.setBounds(320, 370, 60, 25);
+
+        seniorYes.setBackground(Color.WHITE);
         seniorNo.setBackground(Color.WHITE);
 
         seniorGroup = new ButtonGroup();
@@ -126,10 +126,10 @@ public class Signup2 extends JFrame implements ActionListener {
 
         existingYes = new JRadioButton("Yes");
         existingYes.setBounds(250, 410, 60, 25);
-        existingYes.setBackground(Color.WHITE);
-
         existingNo = new JRadioButton("No");
         existingNo.setBounds(320, 410, 60, 25);
+
+        existingYes.setBackground(Color.WHITE);
         existingNo.setBackground(Color.WHITE);
 
         existingGroup = new ButtonGroup();
@@ -171,7 +171,7 @@ public class Signup2 extends JFrame implements ActionListener {
 
                 DBConnection db = new DBConnection();
 
-                String query = "INSERT INTO signup2 VALUES(?,?,?,?,?,?,?,?,?,?)";
+                String query = "INSERT INTO signup2(application_no, religion, category, income, education, occupation, pan, aadhar, senior_citizen, existing_account) VALUES(?,?,?,?,?,?,?,?,?,?)";
 
                 PreparedStatement pst = db.con.prepareStatement(query);
 
@@ -188,14 +188,22 @@ public class Signup2 extends JFrame implements ActionListener {
 
                 pst.executeUpdate();
 
+                pst.close();
+                db.con.close();
+
                 JOptionPane.showMessageDialog(null, "Page 2 Data Saved Successfully");
 
-                setVisible(false);
-                new Signup3(applicationNumber); // next page
+                new Signup3(applicationNumber);
+                this.dispose();
 
             } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void main(String[] args) {
+        new Signup2(1001);
     }
 }

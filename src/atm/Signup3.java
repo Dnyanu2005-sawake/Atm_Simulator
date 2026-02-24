@@ -20,7 +20,6 @@ public class Signup3 extends JFrame implements ActionListener {
 
     JButton submit, cancel;
 
-    // ✅ Constructor
     Signup3(long applicationNumber) {
 
         this.applicationNumber = applicationNumber;
@@ -43,15 +42,13 @@ public class Signup3 extends JFrame implements ActionListener {
         add(accType);
 
         saving = new JRadioButton("Saving Account");
-        saving.setBounds(250, 90, 150, 25);
-
         fixed = new JRadioButton("Fixed Deposit");
-        fixed.setBounds(250, 120, 150, 25);
-
         current = new JRadioButton("Current Account");
-        current.setBounds(250, 150, 150, 25);
-
         recurring = new JRadioButton("Recurring Deposit");
+
+        saving.setBounds(250, 90, 150, 25);
+        fixed.setBounds(250, 120, 150, 25);
+        current.setBounds(250, 150, 150, 25);
         recurring.setBounds(250, 180, 180, 25);
 
         saving.setBackground(Color.WHITE);
@@ -70,27 +67,28 @@ public class Signup3 extends JFrame implements ActionListener {
         add(current);
         add(recurring);
 
-        // 🔥 Auto Generate Card & PIN
+        // 🔥 Generate Card & PIN
         Random random = new Random();
-        long cardNumber = Math.abs((random.nextLong() % 90000000L) + 5040936000000000L);
-        long pinNumber = Math.abs((random.nextLong() % 9000L) + 1000L);
+        long first6 = 504093;
+        long remaining10 = 1000000000L + (long)(Math.random() * 9000000000L);
+        String cardNumber = String.valueOf(first6) + String.valueOf(remaining10);
 
-        // Card
+        int pinNumber = 1000 + random.nextInt(9000);
+
         JLabel card = new JLabel("Card Number:");
         card.setBounds(60, 240, 150, 25);
         add(card);
 
-        cardText = new JTextField("" + cardNumber);
+        cardText = new JTextField(cardNumber);
         cardText.setBounds(250, 240, 200, 25);
         cardText.setEditable(false);
         add(cardText);
 
-        // PIN
         JLabel pin = new JLabel("PIN:");
         pin.setBounds(60, 290, 150, 25);
         add(pin);
 
-        pinText = new JPasswordField("" + pinNumber);
+        pinText = new JPasswordField(String.valueOf(pinNumber));
         pinText.setBounds(250, 290, 200, 25);
         pinText.setEditable(false);
         add(pinText);
@@ -101,21 +99,17 @@ public class Signup3 extends JFrame implements ActionListener {
         add(service);
 
         atm = new JCheckBox("ATM Card");
-        atm.setBounds(250, 340, 150, 25);
-
         internet = new JCheckBox("Internet Banking");
-        internet.setBounds(250, 370, 180, 25);
-
         mobile = new JCheckBox("Mobile Banking");
-        mobile.setBounds(250, 400, 150, 25);
-
         email = new JCheckBox("Email Alerts");
-        email.setBounds(250, 430, 150, 25);
-
         cheque = new JCheckBox("Cheque Book");
-        cheque.setBounds(430, 340, 150, 25);
-
         statement = new JCheckBox("E-Statement");
+
+        atm.setBounds(250, 340, 150, 25);
+        internet.setBounds(250, 370, 180, 25);
+        mobile.setBounds(250, 400, 150, 25);
+        email.setBounds(250, 430, 150, 25);
+        cheque.setBounds(430, 340, 150, 25);
         statement.setBounds(430, 370, 150, 25);
 
         atm.setBackground(Color.WHITE);
@@ -132,7 +126,6 @@ public class Signup3 extends JFrame implements ActionListener {
         add(cheque);
         add(statement);
 
-        // Buttons
         submit = new JButton("SUBMIT");
         submit.setBounds(200, 480, 120, 35);
         submit.addActionListener(this);
@@ -162,18 +155,28 @@ public class Signup3 extends JFrame implements ActionListener {
                 else if (current.isSelected()) accountType = "Current";
                 else if (recurring.isSelected()) accountType = "Recurring";
 
+                if (accountType == null) {
+                    JOptionPane.showMessageDialog(null, "Please select Account Type");
+                    return;
+                }
+
                 String services = "";
 
-                if (atm.isSelected()) services += "ATM Card ";
-                if (internet.isSelected()) services += "Internet Banking ";
-                if (mobile.isSelected()) services += "Mobile Banking ";
-                if (email.isSelected()) services += "Email Alerts ";
-                if (cheque.isSelected()) services += "Cheque Book ";
-                if (statement.isSelected()) services += "E-Statement ";
+                if (atm.isSelected()) services += "ATM Card, ";
+                if (internet.isSelected()) services += "Internet Banking, ";
+                if (mobile.isSelected()) services += "Mobile Banking, ";
+                if (email.isSelected()) services += "Email Alerts, ";
+                if (cheque.isSelected()) services += "Cheque Book, ";
+                if (statement.isSelected()) services += "E-Statement, ";
+
+                if (services.equals("")) {
+                    JOptionPane.showMessageDialog(null, "Please select at least one service");
+                    return;
+                }
 
                 DBConnection db = new DBConnection();
 
-                String query = "INSERT INTO signup3 VALUES(?,?,?,?,?)";
+                String query = "INSERT INTO signup3(application_no, account_type, card_number, pin, services) VALUES(?,?,?,?,?)";
 
                 PreparedStatement pst = db.con.prepareStatement(query);
 
@@ -185,26 +188,29 @@ public class Signup3 extends JFrame implements ActionListener {
 
                 pst.executeUpdate();
 
+                pst.close();
+                db.con.close();
+
                 JOptionPane.showMessageDialog(null,
-                        "Account Created Successfully!\nCard: " + cardText.getText()
+                        "Account Created Successfully!\n\nCard Number: " + cardText.getText()
                                 + "\nPIN: " + new String(pinText.getPassword()));
 
-                setVisible(false);
                 new Login();
+                this.dispose();
 
             } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
                 e.printStackTrace();
             }
         }
 
         if (ae.getSource() == cancel) {
-            setVisible(false);
             new Login();
+            this.dispose();
         }
     }
 
-    // ✅ MAIN METHOD ADDED (Now File Runnable)
     public static void main(String[] args) {
-        new Signup3(1001);   // Test application number
+        new Signup3(1001);
     }
 }
